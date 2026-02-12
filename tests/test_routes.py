@@ -136,3 +136,28 @@ class TestAccountService(TestCase):
         """It should fail to find an account with wrong id"""
         response = self.client.get(f"{BASE_URL}/0", content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_account(self):
+        """It should update an existing account"""
+        account = AccountFactory()
+        response = self.client.post(BASE_URL, json=account.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        account_data = response.get_json()
+        account_data["name"] = "test name"
+        response = self.client.put(f"{BASE_URL}/{account_data['id']}", json=account_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        updated_data = response.get_json()
+        self.assertEqual(updated_data["name"], "test name")
+
+    def test_update_account_not_found(self):
+        """It should fail to update an account with wrong id"""
+        account = AccountFactory()
+        response = self.client.post(BASE_URL, json=account.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        account_data = response.get_json()
+        account_data["name"] = "test name"
+        response = self.client.put(f"{BASE_URL}/0", json=account_data)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
